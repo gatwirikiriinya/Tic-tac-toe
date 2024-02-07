@@ -9,13 +9,9 @@ public class GridController : MonoBehaviour
 
     private Cell[] _mCells = new Cell[9];
 
-    public GameObject strikePrefab;
-
-    private void ShowStrike(Vector3 position, Quaternion rotation)
-    {
-        Instantiate(strikePrefab, position, rotation);
-    }
-
+    public GameObject[] verticalStrikes;
+    public GameObject[] horizontalStrikes;
+    public GameObject[] diagonalStrikes;
 
     public void Build(GameController main)
     {
@@ -34,10 +30,7 @@ public class GridController : MonoBehaviour
         {
             if (CheckValues(i, i + 1) && CheckValues(i, i + 2))
             {
-                // Calculate position for horizontal strike
-                Vector3 strikePosition = (_mCells[i].transform.position + _mCells[i + 2].transform.position) / 2f;
-                Quaternion strikeRotation = Quaternion.identity; // No rotation needed for horizontal win
-                ShowStrike(strikePosition, strikeRotation);
+                ActivateHorizontalStrike(i / 3);
                 return true;
             }
         }
@@ -47,31 +40,25 @@ public class GridController : MonoBehaviour
         {
             if (CheckValues(i, i + 3) && CheckValues(i, i + 6))
             {
-                // Calculate position for vertical strike
-                Vector3 strikePosition = (_mCells[i].transform.position + _mCells[i + 6].transform.position) / 2f;
-                Quaternion strikeRotation = Quaternion.Euler(0f, 0f, 90f); // Rotate 90 degrees for vertical win
-                ShowStrike(strikePosition, strikeRotation);
+                ActivateVerticalStrike(i);
                 return true;
             }
         }
 
         // Diagonal win check
         if (CheckValues(0, 4) && CheckValues(0, 8))
+
         {
-            // Calculate position for diagonal strike (top-left to bottom-right)
-            Vector3 strikePosition = (_mCells[0].transform.position + _mCells[8].transform.position) / 2f;
-            Quaternion strikeRotation = Quaternion.Euler(0f, 0f, -45f); // Rotate -45 degrees for diagonal win
-            ShowStrike(strikePosition, strikeRotation);
+            ActivateDiagonalStrike(0); // Top-left to bottom-right
             return true;
         }
+
         if (CheckValues(2, 4) && CheckValues(2, 6))
         {
-            // Calculate position for diagonal strike (top-right to bottom-left)
-            Vector3 strikePosition = (_mCells[2].transform.position + _mCells[6].transform.position) / 2f;
-            Quaternion strikeRotation = Quaternion.Euler(0f, 0f, 45f); // Rotate 45 degrees for diagonal win
-            ShowStrike(strikePosition, strikeRotation);
+            ActivateDiagonalStrike(1); // Top-right to bottom-left
             return true;
         }
+
 
         return false;
     }
@@ -88,12 +75,55 @@ public class GridController : MonoBehaviour
         else return false;
     }
 
+    private void ActivateVerticalStrike(int column)
+    {
+        verticalStrikes[column].SetActive(true);
+
+    }
+    private void ActivateHorizontalStrike(int row)
+    {
+        horizontalStrikes[row].SetActive(true);
+    }
+
+    private void ActivateDiagonalStrike(int type)
+    {
+        if (type == 0) // Top-left to bottom-right
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                diagonalStrikes[0].SetActive(true);
+            }
+        }
+        else // Top-right to bottom-left
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                diagonalStrikes[1].SetActive(true);
+            }
+        }
+    }
+
     public void ResetGrid()
     {
         foreach (Cell cell in _mCells)
         {
             cell.mLabel.text = ""; // Clear the text
             cell.mButton.interactable = true; // Enable button interaction
+        }
+
+        foreach (GameObject strike in verticalStrikes)
+        {
+            strike.SetActive(false); // Deactivate vertical strikes
+        }
+
+        foreach (GameObject strike in horizontalStrikes)
+        {
+            strike.SetActive(false); // Deactivate horizontal strikes
+        }
+
+        foreach (GameObject strike in diagonalStrikes)
+        {
+            strike.SetActive(false); // Deactivate diagonal strikes
         }
     }
 
